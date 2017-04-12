@@ -1,0 +1,13 @@
+Code test:
+
+1. Create a new project in JavaFX.
+
+2. Build 1 binary version for Windows (.exe) and one for Android (.apk)
+
+3. Make a poker table, see attached image resources. Deal from a deck, out to the 5 slots on the table.
+ Use animations in a platform independent way in 2D canvas or similar.
+ The cards should be animated with the cards backside up, when the card has reached the card slot at the table 
+it should be rotated to show the card. The cards should be dealt randomly from the deck, and from the 52 cards. 
+It should not be possible to see the same card twice on the table. The card deck should be located in the upper center part 
+just outside the table. The total animation time should be 2 seconds, that is for moving the card to the slot, then rotation.
+
