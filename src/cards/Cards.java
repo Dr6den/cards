@@ -72,6 +72,7 @@ public class Cards extends Application {
         topCardImages = setUpTopDeck(topDeck, root);
         
         CardDeck bottomDeck = new CardDeck();
+        bottomCardImages = new ArrayList<>();
         
         /*final TranslateTransition ttJ = new TranslateTransition(Duration.millis(1500),cardImages.get(0));        
         ttJ.setCycleCount(2);
@@ -171,6 +172,45 @@ public class Cards extends Application {
                 rightCardTransition.setToY(81.0);
                 rightCardTransition.setAutoReverse(false);
                 transitions.add(rightCardTransition);
+            }
+        }
+        
+        if (!bottomCards.isEmpty()) {
+            final TranslateTransition leftBottomCardTransition = new TranslateTransition(Duration.millis(1000), bottomCards.get(0));
+            leftBottomCardTransition.setCycleCount(1);
+            leftBottomCardTransition.setByX(105.0);
+            leftBottomCardTransition.setToY(160.0);
+            leftBottomCardTransition.setAutoReverse(false);
+            transitions.add(leftBottomCardTransition);
+            
+            final TranslateTransition leftCenterBottomCardTransition = new TranslateTransition(Duration.millis(1000), bottomCards.get(1));
+            leftCenterBottomCardTransition.setCycleCount(1);
+            leftCenterBottomCardTransition.setByX(55.0);
+            leftCenterBottomCardTransition.setToY(160.0);
+            leftCenterBottomCardTransition.setAutoReverse(false);
+            transitions.add(leftCenterBottomCardTransition);
+
+            final TranslateTransition centerBottomCardTransition = new TranslateTransition(Duration.millis(1000), bottomCards.get(2));
+            centerBottomCardTransition.setCycleCount(1);
+            centerBottomCardTransition.setByX(3.0);
+            centerBottomCardTransition.setToY(160.0);
+            centerBottomCardTransition.setAutoReverse(false);
+            transitions.add(centerBottomCardTransition);
+
+            final TranslateTransition rightCenterBottomCardTransition = new TranslateTransition(Duration.millis(1000), bottomCards.get(3));
+            rightCenterBottomCardTransition.setCycleCount(1);
+            rightCenterBottomCardTransition.setByX(-50.0);
+            rightCenterBottomCardTransition.setToY(160.0);
+            rightCenterBottomCardTransition.setAutoReverse(false);
+            transitions.add(rightCenterBottomCardTransition);
+
+            if (bottomCards.size() > 4) {
+                final TranslateTransition rightBottomCardTransition = new TranslateTransition(Duration.millis(1000), bottomCards.get(4));
+                rightBottomCardTransition.setCycleCount(1);
+                rightBottomCardTransition.setByX(-100.0);
+                rightBottomCardTransition.setToY(160.0);
+                rightBottomCardTransition.setAutoReverse(false);
+                transitions.add(rightBottomCardTransition);
             }
         }
         return transitions;
