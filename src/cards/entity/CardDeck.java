@@ -19,11 +19,28 @@ public class CardDeck {
         this.cards = cards;
     }
     
-    /*public Card getRandomCardFromDeck() {
-        int randomNum = ThreadLocalRandom.current().nextInt(0, 54);
-        //Card card = this.cards.stream()
+    public Card getRandomCardFromDeck() {
+        int randomNum = ThreadLocalRandom.current().nextInt(0, this.cards.size());
+        Card card = this.cards.get(randomNum);
+        this.cards.remove(randomNum);
         return card;
-    }*/
+    }
+    
+    public void addCardToDeck(Card card) {
+        if (this.cards.size() < 54) {
+            this.cards.add(card);
+        }
+    }
+    
+    public List<Card> getTo5CardsFromDeck() {
+        List<Card> cardsFromDeck = new ArrayList<>();
+        byte num = 0;
+        while (num < 5 && this.cards.size() > 0) {
+            cardsFromDeck.add(getRandomCardFromDeck());
+            num++;
+        }
+        return cardsFromDeck;
+    }
     
     public void getNewCardDeck() {
         this.cards = new ArrayList<>();

@@ -1,6 +1,7 @@
 package cards.entity;
 
 import java.io.File;
+import java.util.Objects;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -14,6 +15,9 @@ public class Card {
     private Suit suit;
     private Range range;
     private int numberInDeck;
+
+    public Card() {
+    }
 
     public Card(Suit suit, Range range, int numberInDeck) {
         this.numberInDeck = numberInDeck;
@@ -31,6 +35,47 @@ public class Card {
 
     public void setNumberInDeck(int numberInDeck) {
         this.numberInDeck = numberInDeck;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 23 * hash + Objects.hashCode(this.backSide);
+        hash = 23 * hash + Objects.hashCode(this.frontSide);
+        hash = 23 * hash + Objects.hashCode(this.suit);
+        hash = 23 * hash + Objects.hashCode(this.range);
+        hash = 23 * hash + this.numberInDeck;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Card other = (Card) obj;
+        if (this.numberInDeck != other.numberInDeck) {
+            return false;
+        }
+        if (!Objects.equals(this.backSide, other.backSide)) {
+            return false;
+        }
+        if (!Objects.equals(this.frontSide, other.frontSide)) {
+            return false;
+        }
+        if (this.suit != other.suit) {
+            return false;
+        }
+        if (this.range != other.range) {
+            return false;
+        }
+        return true;
     }
 
     private static ImageView getFrontImage(Suit suit, Range range) {

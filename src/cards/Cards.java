@@ -1,10 +1,13 @@
 package cards;
 
+import cards.entity.Card;
+import cards.entity.CardDeck;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -47,6 +50,8 @@ import javafx.util.Duration;
  * @author andrew
  */
 public class Cards extends Application {
+    private List<ImageView> topCardImages;
+    private List<ImageView> bottomCardImages;
     
     @Override
     public void start(Stage primaryStage) {
@@ -57,32 +62,47 @@ public class Cards extends Application {
         primaryStage.show();
               
         File imageFile = new File("resources/images/pokertable.png");
-        File backSideFile = new File("resources/images/PNG-cards-1.3/back_side.jpg");
         Image im = new Image(imageFile.toURI().toString());               
         ImageView imv = new ImageView(im);
-        imv.setPreserveRatio(true);      
+        imv.setPreserveRatio(true);
+        root.getChildren().add(imv);
         
-        List<ImageView> cardImages = new ArrayList<>();
-        int num = 1;
-        int deckPart = 0;
-        while (num <= 52) {
-            Image cardBackSide = new Image(backSideFile.toURI().toString());
-            ImageView backSideImageView = new ImageView(cardBackSide);
-            backSideImageView.setX(350 + deckPart);
-            backSideImageView.setY(50 + deckPart);
-            backSideImageView.setFitWidth(44);
-            backSideImageView.setFitHeight(60);
-            
-            cardImages.add(backSideImageView);
-            deckPart = (deckPart < 3) ? deckPart + 1 : 0;
-            num++;
-        }
+        CardDeck topDeck = new CardDeck();
+        topDeck.getNewCardDeck();
+        topCardImages = setUpTopDeck(topDeck, root);
+        
+        CardDeck bottomDeck = new CardDeck();
+        
+        /*final TranslateTransition ttJ = new TranslateTransition(Duration.millis(1500),cardImages.get(0));        
+        ttJ.setCycleCount(2);
+        ttJ.setByX(-100.0);
+        ttJ.setToY(-170.0);
+        ttJ.setAutoReverse(true);       
+        
+        final RotateTransition rtJ = new RotateTransition(Duration.millis(500),cardImages.get(0));
+        rtJ.setByAngle(360);
+        rtJ.setAxis(new Point3D(0.0, 0.0, 0.0));
+        rtJ.setCycleCount(6);*/
+        
+        //final ParallelTransition ptJ = new ParallelTransition(cardImages.get(0),ttJ);        
+        
+        final Timeline timeline = new Timeline();
+        timeline.setDelay(Duration.millis(100));
         
         Button btnDeal = new Button();
         btnDeal.setLayoutX(40);
         btnDeal.setLayoutY(270);
         btnDeal.setText("Start dealing new cards");       
         btnDeal.setStyle("-fx-font: bold italic 10pt Georgia;-fx-text-fill: fuchsia;-fx-background-color: green;-fx-border-width: 1px; -fx-border-color:black");
+        btnDeal.setOnAction((ActionEvent event) -> {
+                if (!timeline.getStatus().equals(Animation.Status.RUNNING)) {
+                    List<TranslateTransition> topDeckTransitions = setUpTranslateTransitionsToTopDeck(topCardImages, bottomCardImages);
+                    topDeckTransitions.stream().forEach((TranslateTransition tt) -> tt.play());                    
+                    timeline.play();
+                    bottomCardImages = topCardImages;
+                    topCardImages = setUpTopDeck(topDeck, root);
+                }
+        });
         
         Button btnShow = new Button();
         btnShow.setLayoutX(580);
@@ -90,9 +110,70 @@ public class Cards extends Application {
         btnShow.setText("Show cards");       
         btnShow.setStyle("-fx-font: bold italic 10pt Georgia;-fx-text-fill: fuchsia;-fx-background-color: green;-fx-border-width: 1px; -fx-border-color:black");
         
-        root.getChildren().add(imv);
-        root.getChildren().addAll(cardImages);
         root.getChildren().addAll(btnDeal, btnShow);
+    }
+    
+    private List<ImageView> setUpTopDeck(CardDeck topCardDeck, Group group) {
+        List<Card> cardsFromDeck = topCardDeck.getTo5CardsFromDeck();        
+        List<ImageView> cardImages = new ArrayList<>();
+        for (Card c:cardsFromDeck) {
+            cardImages.add(c.getBackSide());
+        }
+        
+        int deckPart = 0;
+        for (ImageView cardImage:cardImages) {
+            cardImage.setX(350 + deckPart);
+            cardImage.setY(50 + deckPart);
+            cardImage.setFitWidth(44);
+            cardImage.setFitHeight(60);            
+            deckPart++;
+        }
+        group.getChildren().addAll(cardImages);
+        return cardImages;
+    }
+    
+    private List<TranslateTransition> setUpTranslateTransitionsToTopDeck(List<ImageView> topCards, List<ImageView> bottomCards) {
+        List<TranslateTransition> transitions = new ArrayList<>();
+        
+        if (!topCards.isEmpty()) {
+            final TranslateTransition leftCardTransition = new TranslateTransition(Duration.millis(1000), topCards.get(0));
+            leftCardTransition.setCycleCount(1);
+            leftCardTransition.setByX(-105.0);
+            leftCardTransition.setToY(85.0);
+            leftCardTransition.setAutoReverse(false);
+            transitions.add(leftCardTransition);
+
+            final TranslateTransition leftCenterCardTransition = new TranslateTransition(Duration.millis(1000), topCards.get(1));
+            leftCenterCardTransition.setCycleCount(1);
+            leftCenterCardTransition.setByX(-55.0);
+            leftCenterCardTransition.setToY(84.0);
+            leftCenterCardTransition.setAutoReverse(false);
+            transitions.add(leftCenterCardTransition);
+
+            final TranslateTransition centerCardTransition = new TranslateTransition(Duration.millis(1000), topCards.get(2));
+            centerCardTransition.setCycleCount(1);
+            centerCardTransition.setByX(-3.0);
+            centerCardTransition.setToY(83.0);
+            centerCardTransition.setAutoReverse(false);
+            transitions.add(centerCardTransition);
+
+            final TranslateTransition rightCenterCardTransition = new TranslateTransition(Duration.millis(1000), topCards.get(3));
+            rightCenterCardTransition.setCycleCount(1);
+            rightCenterCardTransition.setByX(50.0);
+            rightCenterCardTransition.setToY(82.0);
+            rightCenterCardTransition.setAutoReverse(false);
+            transitions.add(rightCenterCardTransition);
+
+            if (topCards.size() > 4) {
+                final TranslateTransition rightCardTransition = new TranslateTransition(Duration.millis(1000), topCards.get(4));
+                rightCardTransition.setCycleCount(1);
+                rightCardTransition.setByX(100.0);
+                rightCardTransition.setToY(81.0);
+                rightCardTransition.setAutoReverse(false);
+                transitions.add(rightCardTransition);
+            }
+        }
+        return transitions;
     }
 
     /**
