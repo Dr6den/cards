@@ -133,6 +133,7 @@ public class Card {
                         url.append("ace_of_hearts.png");
                         break;
                 }
+                break;
             case SPADES:
                 switch (range) {
                     case _2:
@@ -175,6 +176,7 @@ public class Card {
                         url.append("ace_of_spades.png");
                         break;
                 }
+                break;
             case DIAMONDS:
                 switch (range) {
                     case _2:
@@ -217,6 +219,7 @@ public class Card {
                         url.append("ace_of_diamonds.png");
                         break;
                 }
+                break;
             case CLUBS:
                 switch (range) {
                     case _2:
@@ -259,7 +262,6 @@ public class Card {
                         url.append("ace_of_clubs.png");
                         break;
                 }
-
         }
 
         File frontSideFile = new File(url.toString());

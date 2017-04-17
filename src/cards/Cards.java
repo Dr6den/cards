@@ -3,16 +3,10 @@ package cards;
 import cards.entity.Card;
 import cards.entity.CardDeck;
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import javafx.animation.Animation;
-import javafx.animation.Interpolator;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.ParallelTransition;
 import javafx.animation.RotateTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
@@ -21,27 +15,12 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
-import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.effect.BlendMode;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.Light;
-import javafx.scene.effect.Lighting;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -52,6 +31,9 @@ import javafx.util.Duration;
 public class Cards extends Application {
     private List<ImageView> topCardImages;
     private List<ImageView> bottomCardImages;
+    private List<ImageView> frontCardImages;
+    List<Card> playersCardsFromDeck;
+    boolean isCardsWereOpened = false;
     
     @Override
     public void start(Stage primaryStage) {
@@ -69,39 +51,27 @@ public class Cards extends Application {
         
         CardDeck topDeck = new CardDeck();
         topDeck.getNewCardDeck();
-        topCardImages = setUpTopDeck(topDeck, root);
-        
-        CardDeck bottomDeck = new CardDeck();
-        bottomCardImages = new ArrayList<>();
-        
-        /*final TranslateTransition ttJ = new TranslateTransition(Duration.millis(1500),cardImages.get(0));        
-        ttJ.setCycleCount(2);
-        ttJ.setByX(-100.0);
-        ttJ.setToY(-170.0);
-        ttJ.setAutoReverse(true);       
-        
-        final RotateTransition rtJ = new RotateTransition(Duration.millis(500),cardImages.get(0));
-        rtJ.setByAngle(360);
-        rtJ.setAxis(new Point3D(0.0, 0.0, 0.0));
-        rtJ.setCycleCount(6);*/
-        
-        //final ParallelTransition ptJ = new ParallelTransition(cardImages.get(0),ttJ);        
+        playersCardsFromDeck = topDeck.getTo5CardsFromDeck();
+        topCardImages = setUpTopDeck(playersCardsFromDeck, root);        
+        bottomCardImages = new ArrayList<>();        
         
         final Timeline timeline = new Timeline();
-        timeline.setDelay(Duration.millis(100));
+        timeline.setDelay(Duration.millis(500));
         
         Button btnDeal = new Button();
         btnDeal.setLayoutX(40);
         btnDeal.setLayoutY(270);
         btnDeal.setText("Start dealing new cards");       
         btnDeal.setStyle("-fx-font: bold italic 10pt Georgia;-fx-text-fill: fuchsia;-fx-background-color: green;-fx-border-width: 1px; -fx-border-color:black");
-        btnDeal.setOnAction((ActionEvent event) -> {
+        btnDeal.setOnAction((ActionEvent event) -> {Animation.Status status = timeline.getStatus();
                 if (!timeline.getStatus().equals(Animation.Status.RUNNING)) {
-                    List<TranslateTransition> topDeckTransitions = setUpTranslateTransitionsToTopDeck(topCardImages, bottomCardImages);
+                    List<TranslateTransition> topDeckTransitions = setUpTranslateTransitionsToDeck(topCardImages, bottomCardImages);
                     topDeckTransitions.stream().forEach((TranslateTransition tt) -> tt.play());                    
-                    timeline.play();
+                    timeline.play();status = timeline.getStatus();
                     bottomCardImages = topCardImages;
-                    topCardImages = setUpTopDeck(topDeck, root);
+                    playersCardsFromDeck = topDeck.getTo5CardsFromDeck();
+                    topCardImages = setUpTopDeck(playersCardsFromDeck, root);
+                    frontCardImages = setUpFrontCardImages(playersCardsFromDeck);
                 }
         });
         
@@ -110,12 +80,26 @@ public class Cards extends Application {
         btnShow.setLayoutY(270);
         btnShow.setText("Show cards");       
         btnShow.setStyle("-fx-font: bold italic 10pt Georgia;-fx-text-fill: fuchsia;-fx-background-color: green;-fx-border-width: 1px; -fx-border-color:black");
+        btnShow.setOnAction((ActionEvent event) -> {
+            if (!isCardsWereOpened) {
+                List<RotateTransition> rotateTransitions = setUpRotateToShowTheCards(bottomCardImages);
+                rotateTransitions.stream().forEach((RotateTransition rt) -> rt.play());
+                if (frontCardImages != null) {
+                    root.getChildren().addAll(frontCardImages);
+                }
+                isCardsWereOpened = true;
+            } else {
+                List<RotateTransition> rotateTransitions = setUpRotateToShowTheCards(bottomCardImages);
+                rotateTransitions.stream().forEach((RotateTransition rt) -> rt.play());
+                root.getChildren().removeAll(frontCardImages);
+                isCardsWereOpened = false;
+            }
+        });
         
         root.getChildren().addAll(btnDeal, btnShow);
     }
     
-    private List<ImageView> setUpTopDeck(CardDeck topCardDeck, Group group) {
-        List<Card> cardsFromDeck = topCardDeck.getTo5CardsFromDeck();        
+    private List<ImageView> setUpTopDeck(List<Card> cardsFromDeck, Group group) {      
         List<ImageView> cardImages = new ArrayList<>();
         for (Card c:cardsFromDeck) {
             cardImages.add(c.getBackSide());
@@ -133,7 +117,50 @@ public class Cards extends Application {
         return cardImages;
     }
     
-    private List<TranslateTransition> setUpTranslateTransitionsToTopDeck(List<ImageView> topCards, List<ImageView> bottomCards) {
+    private List<ImageView> setUpFrontCardImages(List<Card> cardsFromDeck) {
+        List<ImageView> cardImages = new ArrayList<>();
+        for (Card c:cardsFromDeck) {
+            cardImages.add(c.getFrontSide());
+        }
+        
+        int rightReplacementStep = 0;
+        for (ImageView cardImage:cardImages) {
+            cardImage.setX(245 + rightReplacementStep);
+            cardImage.setY(133);
+            cardImage.setFitWidth(44);
+            cardImage.setFitHeight(60);
+            rightReplacementStep = rightReplacementStep + 52;
+        }
+        return cardImages;
+    }
+    
+    private List<RotateTransition> setUpRotateToShowTheCards(List<ImageView> bottomCards) {
+        List<RotateTransition> transitions = new ArrayList<>();
+        
+        for (ImageView image:bottomCards) {
+            final RotateTransition backTransition = new RotateTransition(Duration.millis(400), image);
+            backTransition.setByAngle(90);
+            backTransition.setAxis(new Point3D(0.0, 1.0, 0.0));
+            backTransition.setCycleCount(1);
+            transitions.add(backTransition);
+        }       
+        return transitions;
+    }
+    
+    private List<RotateTransition> setUpRotateToCloseTheCards(List<ImageView> bottomCards) {
+        List<RotateTransition> transitions = new ArrayList<>();
+        
+        for (ImageView image:bottomCards) {
+            final RotateTransition backTransition = new RotateTransition(Duration.millis(400), image);
+            backTransition.setByAngle(90);
+            backTransition.setAxis(new Point3D(0.0, 1.0, 0.0));
+            backTransition.setCycleCount(1);
+            transitions.add(backTransition);
+        }       
+        return transitions;
+    }
+    
+    private List<TranslateTransition> setUpTranslateTransitionsToDeck(List<ImageView> topCards, List<ImageView> bottomCards) {
         List<TranslateTransition> transitions = new ArrayList<>();
         
         if (!topCards.isEmpty()) {
