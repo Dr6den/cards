@@ -7,8 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import javafx.animation.Animation;
+import javafx.animation.Interpolator;
+import javafx.animation.PauseTransition;
 import javafx.animation.RotateTransition;
 import javafx.animation.ScaleTransition;
+import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
@@ -94,15 +97,17 @@ public class Cards extends Application {
                 rotateTransitions.stream().forEach((RotateTransition rt) -> rt.play());
                 if (frontCardImages != null) {
                     root.getChildren().addAll(frontCardImages);
-                    List<RotateTransition> frontRotateTransitions = setUpRotateToFrontCardSides(frontCardImages);
-                    frontRotateTransitions.stream().forEach((RotateTransition rt) -> rt.play());
+                    List<SequentialTransition> frontRotateTransitions = setUpRotateToFrontCardSides(frontCardImages);
+                    frontRotateTransitions.stream().forEach((SequentialTransition rt) -> rt.play());
                 }
                 isCardsWereOpened = true;
             } else {
                 List<RotateTransition> rotateTransitions = setUpRotateToShowTheCards(bottomCardImages);
                 rotateTransitions.stream().forEach((RotateTransition rt) -> rt.play());
+                timeline.play();
                 List<RotateTransition> frontRotateTransitions = setUpRotateToShowTheCards(frontCardImages);
                 frontRotateTransitions.stream().forEach((RotateTransition rt) -> rt.play());
+                timeline.play();
                 root.getChildren().removeAll(frontCardImages);
                 isCardsWereOpened = false;
             }
@@ -153,14 +158,14 @@ public class Cards extends Application {
             final RotateTransition backTransition = new RotateTransition(Duration.millis(400), image);
             backTransition.setByAngle(90);
             backTransition.setAxis(new Point3D(0.0, 1.0, 0.0));
-            backTransition.setCycleCount(1);
+            backTransition.setCycleCount(1);            
             transitions.add(backTransition);
         }       
         return transitions;
     }
     
-    private List<RotateTransition> setUpRotateToFrontCardSides(List<ImageView> frontCards) {
-        List<RotateTransition> transitions = new ArrayList<>();
+    private List<SequentialTransition> setUpRotateToFrontCardSides(List<ImageView> frontCards) {
+        List<SequentialTransition> transitions = new ArrayList<>();
         
         for (ImageView image:frontCards) {
             final RotateTransition frontTransition = new RotateTransition(Duration.millis(400), image);
@@ -168,7 +173,10 @@ public class Cards extends Application {
             frontTransition.setAxis(new Point3D(0.0, 1.0, 0.0));
             frontTransition.setCycleCount(1);
             frontTransition.setFromAngle(90);
-            transitions.add(frontTransition);
+            SequentialTransition seqTransition = new SequentialTransition (
+                new PauseTransition(Duration.millis(400)), frontTransition
+            );
+            transitions.add(seqTransition);
         }       
         return transitions;
     }
