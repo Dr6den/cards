@@ -66,24 +66,25 @@ public class Cards extends Application {
         btnDeal.setLayoutY(270);
         btnDeal.setText("Start dealing new cards");       
         btnDeal.setStyle("-fx-font: bold italic 10pt Georgia;-fx-text-fill: fuchsia;-fx-background-color: green;-fx-border-width: 1px; -fx-border-color:black");
-        btnDeal.setOnAction((ActionEvent event) -> {Animation.Status status = timeline.getStatus();
+        btnDeal.setOnAction((ActionEvent event) -> {
+                btnDeal.setDisable(true);
                 if (!timeline.getStatus().equals(Animation.Status.RUNNING)) {
                     if (isCardsWereOpened) {
-                        List<RotateTransition> rotateTransitions = setUpRotateToShowTheCards(bottomCardImages);
-                        rotateTransitions.stream().forEach((RotateTransition rt) -> rt.play());
-                        List<RotateTransition> frontRotateTransitions = setUpRotateToShowTheCards(frontCardImages);
-                        frontRotateTransitions.stream().forEach((RotateTransition rt) -> rt.play());
+                        List<SequentialTransition> rotateTransitions = setUpRotateToShowTheCards(bottomCardImages, 0);
+                        rotateTransitions.stream().forEach((SequentialTransition rt) -> rt.play());
+                        List<SequentialTransition> frontRotateTransitions = setUpRotateToShowTheCards(frontCardImages, 400);
+                        frontRotateTransitions.stream().forEach((SequentialTransition rt) -> rt.play());
                         root.getChildren().removeAll(frontCardImages);
                         isCardsWereOpened = false;
                     }
                     List<TranslateTransition> topDeckTransitions = setUpTranslateTransitionsToDeck(topCardImages, bottomCardImages);
                     topDeckTransitions.stream().forEach((TranslateTransition tt) -> tt.play());                    
-                    timeline.play();status = timeline.getStatus();
+                    timeline.play();
                     bottomCardImages = topCardImages;
                     playersCardsFromDeck = topDeck.getTo5CardsFromDeck();
                     topCardImages = setUpTopDeck(playersCardsFromDeck, root);
                     frontCardImages = setUpFrontCardImages(playersCardsFromDeck);
-                }
+                }                
         });
         
         Button btnShow = new Button();
@@ -92,9 +93,9 @@ public class Cards extends Application {
         btnShow.setText("Show cards");       
         btnShow.setStyle("-fx-font: bold italic 10pt Georgia;-fx-text-fill: fuchsia;-fx-background-color: green;-fx-border-width: 1px; -fx-border-color:black");
         btnShow.setOnAction((ActionEvent event) -> {
-            if (!isCardsWereOpened) {
-                List<RotateTransition> rotateTransitions = setUpRotateToShowTheCards(bottomCardImages);
-                rotateTransitions.stream().forEach((RotateTransition rt) -> rt.play());
+            if (!isCardsWereOpened) {                
+                List<SequentialTransition> rotateTransitions = setUpRotateToShowTheCards(bottomCardImages, 0);
+                rotateTransitions.stream().forEach((SequentialTransition rt) -> rt.play());
                 if (frontCardImages != null) {
                     root.getChildren().addAll(frontCardImages);
                     List<SequentialTransition> frontRotateTransitions = setUpRotateToFrontCardSides(frontCardImages);
@@ -102,15 +103,16 @@ public class Cards extends Application {
                 }
                 isCardsWereOpened = true;
             } else {
-                List<RotateTransition> rotateTransitions = setUpRotateToShowTheCards(bottomCardImages);
-                rotateTransitions.stream().forEach((RotateTransition rt) -> rt.play());
+                List<SequentialTransition> rotateTransitions = setUpRotateToShowTheCards(bottomCardImages, 0);
+                rotateTransitions.stream().forEach((SequentialTransition rt) -> rt.play());
                 timeline.play();
-                List<RotateTransition> frontRotateTransitions = setUpRotateToShowTheCards(frontCardImages);
-                frontRotateTransitions.stream().forEach((RotateTransition rt) -> rt.play());
+                List<SequentialTransition> frontRotateTransitions = setUpRotateToShowTheCards(frontCardImages, 400);
+                frontRotateTransitions.stream().forEach((SequentialTransition rt) -> rt.play());
                 timeline.play();
                 root.getChildren().removeAll(frontCardImages);
                 isCardsWereOpened = false;
             }
+            btnDeal.setDisable(false);
         });
         
         root.getChildren().addAll(btnDeal, btnShow);
@@ -151,15 +153,18 @@ public class Cards extends Application {
         return cardImages;
     }
     
-    private List<RotateTransition> setUpRotateToShowTheCards(List<ImageView> bottomCards) {
-        List<RotateTransition> transitions = new ArrayList<>();
+    private List<SequentialTransition> setUpRotateToShowTheCards(List<ImageView> bottomCards, int delayMillis) {
+        List<SequentialTransition> transitions = new ArrayList<>();
         
         for (ImageView image:bottomCards) {
             final RotateTransition backTransition = new RotateTransition(Duration.millis(400), image);
             backTransition.setByAngle(90);
             backTransition.setAxis(new Point3D(0.0, 1.0, 0.0));
-            backTransition.setCycleCount(1);            
-            transitions.add(backTransition);
+            backTransition.setCycleCount(1);          
+            SequentialTransition seqTransition = new SequentialTransition (
+                new PauseTransition(Duration.millis(delayMillis)), backTransition
+            );
+            transitions.add(seqTransition);
         }       
         return transitions;
     }
