@@ -5,18 +5,14 @@ import cards.entity.CardDeck;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 import javafx.animation.Animation;
-import javafx.animation.Interpolator;
 import javafx.animation.PauseTransition;
 import javafx.animation.RotateTransition;
-import javafx.animation.ScaleTransition;
 import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -40,7 +36,7 @@ public class Cards extends Application {
     
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Тестирование GUI-компонентов");
+        primaryStage.setTitle("Play the cards");
         Group root = new Group();
         Scene scene = new Scene(root, 744, 360, Color.DARKGREEN);
         primaryStage.setScene(scene);
